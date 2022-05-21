@@ -111,8 +111,9 @@ dropFirst (X , [H | Xs ], [H | L ]) :- dropFirst (X , Xs , L ) .
 %																							/																	\
 %																					Yes. L / [10, 20, 10, 30]					  no
 % lascio intatto l'albero  ma elimino solo alla fine quando la lista L è vuota perchè vuol dire che sono in fondo
-dropLast (X , [X], []) :- !.
-dropLast (X , [H | Xs ], [H | L ]) :- dropLast (X , Xs , L ).
+% questa soluzione non funziona in tutti i casi ... quella dopo sì
+% dropLast (X , [X], []) :- !.
+% dropLast (X , [H | Xs ], [H | L ]) :- dropLast (X , Xs , L ).
 
 % Altra idea, specchiare l'albero e cambiare l'ordine dei predicati 
 dropLast_2 (X , [H | Xs ], [H | L ]) :- dropLast(X , Xs , L ), ! .
@@ -144,8 +145,8 @@ fromList ([ H1 , H2 |T ] ,[ e(H1 , H2 ) |L ]) :- fromList ([ H2 |T] ,L) .
 fromCircList ([], []).
 fromCircList ([H1] ,[e(H1, H1)]) .
 fromCircList ([ H1 , H2 |T ] ,[ e(H1 , H2 ) |L ]) :- fromCircList ([ H2 |T] ,L, H1) .
-fromCircList ([H1], [ e(H1, Hinit) ], Hinit) .
-fromCircList ([ H1 , H2 |T ], [ e(H1 , H2 ) |L ], Hinit) :- fromCircList ([ H2 |T] ,L, Hinit) .
+fromCircList ([H1], [ e(H1, H) ], H) .
+fromCircList ([ H1 , H2 |T ], [ e(H1 , H2 ) |L ], H) :- fromCircList ([ H2 |T] ,L, H) .
 
 % inDegree (+ Graph , +Node , -Deg)
 
@@ -153,8 +154,8 @@ fromCircList ([ H1 , H2 |T ], [ e(H1 , H2 ) |L ], Hinit) :- fromCircList ([ H2 |
 
 inDegree ( G, N, D) :- inDegree (G, N, D, 0) .
 inDegree ([], N, D, D) .
-inDegree ( [e(H1, N)|T], N, D, L ) :- L2 is L + 1, inDegree (T, N, D, L2) .
-inDegree ( [e(H1, H2)|T], N, D, L ) :- inDegree (T, N, D, L) .
+inDegree ( [e(H1, N)|T], N, D, L ) :- L2 is L + 1, !, inDegree (T, N, D, L2) .
+inDegree ( [_|T], N, D, L ) :- inDegree (T, N, D, L) .
 
 % dropNode (+ Graph , +Node , -OutGraph )
 
@@ -173,7 +174,7 @@ dropAllCopy (X, [H | Xs], [H | L]) :- dropAllCopy (X, Xs, L) .
 
 % dropNode (G, N, OG) :- dropAll (e(N ,_),G, G2), dropAll (e(_ ,N ), G2, OG) . --> NO È ROTTO!
 
- dropNode (G, N, OG) :- dropAllCopy (e(N ,_),G, G2), dropAllCopy (e(_ ,N ), G2, OG) .
+dropNode (G, N, OG) :- dropAllCopy (e(N ,_),G, G2), dropAllCopy (e(_ ,N ), G2, OG) .
 
 % dropNode([e(1,2),e(1,3),e(2,3)],1,[e(2,3)]).
 
@@ -216,9 +217,6 @@ anypath ([ e(N1, N2) | T], N1, N2, [e(N1,N2)], G) .
 % es: allreaching([e(1,2),e(2,3),e(3,5)],1,[2,3,5]).
 
 allreaching(Graph, Node, List) :- anypath(Graph, Node, M, L), !, findall(H2, member(e(H1, H2), L), List) .
-
-
-% grid-like nets ???????????? COS'E?
 
 
 
